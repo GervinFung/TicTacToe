@@ -30,11 +30,14 @@ public final class Board {
             int numberOfTilesOccupied = 0;
             for (int k = 1; k < tiles[0].length; k++) {
                 if (!tiles[i][k - 1].tileNotOccupied() && !tiles[i][k].tileNotOccupied()) {
-                    if (tiles[i][k - 1].shapeOnTile().getShape() != tiles[i][k].shapeOnTile().getShape())
+                    if (tiles[i][k - 1].shapeOnTile().getShape() != tiles[i][k].shapeOnTile().getShape()) {
                         return false;
-                    else numberOfTilesOccupied++;
-                    if (numberOfTilesOccupied == this.grid - 1)
+                    } else {
+                        numberOfTilesOccupied++;
+                    }
+                    if (numberOfTilesOccupied == this.grid - 1) {
                         return true;
+                    }
                 }
             }
         }
@@ -47,10 +50,12 @@ public final class Board {
             int numberOfTilesOccupied = 0;
             for (int k = 1; k < tiles[0].length; k++) {
                 if (!tiles[k - 1][i].tileNotOccupied() && !tiles[k][i].tileNotOccupied()) {
-                    if (tiles[k - 1][i].shapeOnTile().getShape() == tiles[k][i].shapeOnTile().getShape())
+                    if (tiles[k - 1][i].shapeOnTile().getShape() == tiles[k][i].shapeOnTile().getShape()) {
                         numberOfTilesOccupied++;
-                    if (numberOfTilesOccupied == this.grid - 1)
+                    }
+                    if (numberOfTilesOccupied == this.grid - 1) {
                         return true;
+                    }
                 }
             }
         }
@@ -62,11 +67,14 @@ public final class Board {
         int numberOfTilesOccupied = 0;
         for (int k = 1; k < tiles.length; k++) {
             if (!tiles[k - 1][k - 1].tileNotOccupied() && !tiles[k][k].tileNotOccupied()) {
-                if (tiles[k - 1][k - 1].shapeOnTile().getShape() == tiles[k][k].shapeOnTile().getShape())
+                if (tiles[k - 1][k - 1].shapeOnTile().getShape() == tiles[k][k].shapeOnTile().getShape()) {
                     numberOfTilesOccupied++;
-                else return false;
-                if (numberOfTilesOccupied == this.grid - 1)
+                } else {
+                    return false;
+                }
+                if (numberOfTilesOccupied == this.grid - 1) {
                     return true;
+                }
             }
         }
         return false;
@@ -81,10 +89,12 @@ public final class Board {
                 if (tiles[k][maxSize].shapeOnTile().getShape() == tiles[k + 1][maxSize - 1].shapeOnTile().getShape()) {
                     numberOfTilesOccupied++;
                     maxSize--;
+                } else {
+                    return false;
                 }
-                else return false;
-                if (numberOfTilesOccupied == this.grid - 1)
+                if (numberOfTilesOccupied == this.grid - 1) {
                     return true;
+                }
             }
         }
         return false;
@@ -97,8 +107,9 @@ public final class Board {
     protected boolean isDraw() {
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[0].length; j++) {
-                if (tiles[i][j].tileNotOccupied())
+                if (tiles[i][j].tileNotOccupied()) {
                     return false;
+                }
             }
         }
         return true;

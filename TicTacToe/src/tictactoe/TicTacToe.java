@@ -36,8 +36,9 @@ public final class TicTacToe extends JPanel{
             this.buttons[i] = new JButton();
             jf.add(this.buttons[i]);
         }
-        for (int i = 0; i < this.buttons.length; i++)
+        for (int i = 0; i < this.buttons.length; i++) {
             this.buttons[i].setBackground(Color.WHITE);
+        }
     }
     //remove all the buttons added to JFrame
     //for restarting new game
@@ -72,8 +73,9 @@ public final class TicTacToe extends JPanel{
     }
 
     private void addActionListener(final MouseAction mouseAction) {
-        for (int i = 0; i < buttons.length; i++)
+        for (int i = 0; i < buttons.length; i++) {
             buttons[i].addActionListener(mouseAction);
+        }
     }
 
     //set tic tac toe grids
@@ -89,35 +91,37 @@ public final class TicTacToe extends JPanel{
                 break;
             }
             match = pattern.matcher(input).matches();
-            if (match)
+            if (match) {
                 size = Integer.parseInt(input);
+            }
         } while (!(size >= 3 && size <= 11) || !match);
-        if (inputNull)
+        if (inputNull) {
             System.exit(0);
+        }
         this.board.setGrid(size);
         this.buttons = new JButton[size * size];
     }
     //resize image according to number and size of grids
     private ImageIcon resizeIcon(final ImageIcon icon, final int resizedWidth, final int resizedHeight) {
-        Image img = icon.getImage();
-        Image resizedImage = img.getScaledInstance(resizedWidth, resizedHeight,  java.awt.Image.SCALE_SMOOTH);
+        final Image img = icon.getImage();
+        final Image resizedImage = img.getScaledInstance(resizedWidth, resizedHeight,  java.awt.Image.SCALE_SMOOTH);
         return new ImageIcon(resizedImage);
     }
 
     private class MouseAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent event) {
-            JButton button = (JButton)event.getSource();
-            String imagePath = (firstPlayer) ? "X.png" : "O.png";
+            final JButton button = (JButton)event.getSource();
+            String imagePath = (firstPlayer) ? "shape_image/X.png" : "shape_image/O.png";
             final File file = new File(imagePath);
             //for getting the absolute path of imagePath
             imagePath = file.getAbsolutePath();
-            char name = (firstPlayer) ? 'X' : 'O';
-            int x = (int)Math.round(button.getLocation().getX()/TicTacToe.this.divisor);
-            int y = (int)Math.round(button.getLocation().getY()/TicTacToe.this.divisor);
+            final char name = (firstPlayer) ? 'X' : 'O';
+            final int x = (int)Math.round(button.getLocation().getX()/TicTacToe.this.divisor);
+            final int y = (int)Math.round(button.getLocation().getY()/TicTacToe.this.divisor);
             if (board.getTileOn(x, y).tileNotOccupied()) {
                 firstPlayer = !firstPlayer;
-                board.getTileOn(x, y).setShapeOnTile(new Shape(x, y, name));
+                board.getTileOn(x, y).setShapeOnTile(new Shape(name));
                 final ImageIcon icon = resizeIcon(new ImageIcon(imagePath), button.getWidth(), button.getHeight());
                 button.setIcon(icon);
                 if (board.isWin()) {
@@ -125,8 +129,7 @@ public final class TicTacToe extends JPanel{
                     JOptionPane.showMessageDialog(null, message);
                     removeButton();
                     startGame();
-                }
-                else if (board.isDraw()) {
+                } else if (board.isDraw()) {
                     final String message = "Game drawn";
                     JOptionPane.showMessageDialog(null, message);
                     removeButton();

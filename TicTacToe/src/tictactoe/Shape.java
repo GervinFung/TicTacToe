@@ -2,12 +2,20 @@ package tictactoe;
 
 public final class Shape {
 
-    private char shape;
+    private final Shapes shape;
+    private final int score;
+    public enum Shapes{
+        X,O
+    }
 
-    protected char getShape() {
+    protected Shapes getShape() {
         return this.shape;
     }
-    public Shape(final char shape) {
+    protected int getScore() {
+        return this.score;
+    }
+    public Shape(final Shapes shape, final int score) {
         this.shape = shape;
+        this.score = score;
     }
 }

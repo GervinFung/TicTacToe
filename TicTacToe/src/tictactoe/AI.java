@@ -18,75 +18,79 @@ public final class AI {
         return this.chosenTile;
     }
 
-    private int minimax(final Board board, final int depth, final boolean maximizing, final Shapes shape, int alpha, int beta) {
+    private int max(final Board board, final int depth, final Shapes shape, int alpha, final int beta) {
+            if (board.isWin(shape)) {
+                if (shape == Shapes.X) {
+                    return -10 + depth;
+                }
+            }
+            else if (board.isDraw()) {
+                if (shape == Shapes.X) {
+                    return -0 + depth;
+                }
+            }
+        //cpu can search until the end if grid is 3
+        if (depth == 0 && this.tilesNumber > 3) {
+            return evaluationBoard(board);
+        }
+        final int grid = this.tilesNumber;
+        int bestScore = Integer.MIN_VALUE;
+        for (int i = 0; i < grid; i++) {
+            for (int j = 0; j < grid; j++) {
+                if (board.getTileOn(i, j).tileNotOccupied()) {
+                    //make move
+                    board.createShape(new Shape(Shapes.O, 1), i, j);
+                    //calculate score
+                    final int score = min((Board)board.clone(), depth - 1, Shapes.O, alpha, beta);
+                    //undo move
+                    board.createShape(null, i, j);
+                    bestScore = Math.max(score, bestScore);
+                    alpha = Math.max(alpha, bestScore);
+                    if (beta <= alpha) {
+                        return alpha;
+                    }
+                }
+            }
+        }
+        return bestScore;
+    }
+
+    private int min (final Board board, final int depth, final Shapes shape, final int alpha, int beta) {
         if (board.isWin(shape)) {
             if (shape == Shapes.O) {
                 return 10 - depth;
-            }
-            else {
-                return -10 + depth;
             }
         }
         else if (board.isDraw()) {
             if (shape == Shapes.O) {
                 return 0 - depth;
             }
-            else {
-                return -0 + depth;
-            }
         }
         //cpu can search until the end if grid is 3
         if (depth == 0 && this.tilesNumber > 3) {
             return evaluationBoard(board);
         }
-        if (maximizing) {
-            final int grid = this.tilesNumber;
-            int bestScore = Integer.MIN_VALUE;
-            for (int i = 0; i < grid; i++) {
-                for (int j = 0; j < grid; j++) {
-                    if (board.getTileOn(i, j).tileNotOccupied()) {
-                        //make move
-                        board.getTileOn(i, j).setShapeOnTile(new Shape(Shapes.O, 1));
-                        board.getTileOn(i, j).setCoordinate(i, j);
-                        //calculate score
-                        final int score = minimax((Board)board.clone(), depth - 1, false, Shapes.O, alpha, beta);
-                        //undo move
-                        board.getTileOn(i, j).setCoordinate(-1, -1);
-                        board.getTileOn(i, j).setShapeOnTile(null);
-                        bestScore = Math.max(score, bestScore);
-                        alpha = Math.max(alpha, bestScore);
-                        if (beta <= alpha) {
-                            return alpha;
-                        }
-                    }
-                }
-            }
-            return bestScore;
-        } else {
-            final int grid = this.tilesNumber;
-            int bestScore = Integer.MAX_VALUE;
-            for (int i = 0; i < grid; i++) {
-                for (int j = 0; j < grid; j++) {
-                    if (board.getTileOn(i, j).tileNotOccupied()) {
-                        //make move
-                        board.getTileOn(i, j).setShapeOnTile(new Shape(Shapes.X, -1));
-                        board.getTileOn(i, j).setCoordinate(i, j);
+        final int grid = this.tilesNumber;
+        int bestScore = Integer.MAX_VALUE;
+        for (int i = 0; i < grid; i++) {
+            for (int j = 0; j < grid; j++) {
+                if (board.getTileOn(i, j).tileNotOccupied()) {
+                    //make move
+                    board.createShape(new Shape(Shapes.X, -1), i, j);
 
-                        //calculate score
-                        final int score = minimax((Board)board.clone(), depth - 1, true, Shapes.X, alpha, beta);
-                        //undo move
-                        board.getTileOn(i, j).setCoordinate(-1, -1);
-                        board.getTileOn(i, j).setShapeOnTile(null);
-                        bestScore = Math.min(score, bestScore);
-                        beta = Math.min(beta, bestScore);
-                        if (beta <= alpha) {
-                            return beta;
-                        }
+                    //calculate score
+                    final int score = max((Board)board.clone(), depth - 1, Shapes.X, alpha, beta);
+                    //undo move
+                    board.createShape(null, i, j);
+                    bestScore = Math.min(score, bestScore);
+                    beta = Math.min(beta, bestScore);
+                    if (beta <= alpha) {
+                        return beta;
                     }
                 }
             }
-            return bestScore;
         }
+        return bestScore;
     }
 
     protected void bestMove(final Board board) {
@@ -97,15 +101,13 @@ public final class AI {
                 if (board.getTileOn(i, j).tileNotOccupied()) {
 
                     //make move
-                    board.getTileOn(i, j).setShapeOnTile(new Shape(Shapes.O, 1));
-                    board.getTileOn(i, j).setCoordinate(i, j);
+                    board.createShape(new Shape(Shapes.O, 1), i, j);
 
                     final Tile tempTile = (Tile)board.getTileOn(i, j).clone();
                     //calculate score
-                    final int score = minimax((Board)board.clone(), 4, false, Shapes.O, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                    final int score = min((Board)board.clone(), 4, Shapes.O, Integer.MIN_VALUE, Integer.MAX_VALUE);
                     //undo move
-                    board.getTileOn(i, j).setCoordinate(-1, -1);
-                    board.getTileOn(i, j).setShapeOnTile(null);
+                    board.createShape(null, i, j);
                     if (score > bestScore) {
                         bestScore = score;
                         this.setTile(tempTile);

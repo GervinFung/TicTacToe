@@ -3,39 +3,44 @@ package tictactoe;
 import tictactoe.Shape.Shapes;
 
 public final class Board implements Cloneable {
-    private int grid;
-    private Tile[][] tiles;
+    private final int grid;
+    private final Tile[][] tiles;
 
-    protected void setGrid(final int grid) {
+    public Board(final int grid) {
         this.grid = grid;
+        this.tiles = new Tile[this.grid][this.grid];
+        createBoard();
     }
+
     protected int getGrid() {
         return this.grid;
     }
 
     protected Tile[][] getTiles() {
-        return tiles;
+        return this.tiles;
     }
     protected Tile getTileOn(final int x, final int y) {
-        return tiles[y][x];
+        return this.tiles[y][x];
+    }
+    protected void createShape(final Shape shape, final int x, final int y) {
+        this.tiles[y][x] = new Tile(shape, x, y);
     }
     protected void createBoard() {
-        tiles = new Tile[this.grid][this.grid];
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[0].length; j++) {
-                tiles[i][j] = new Tile();
+        for (int i = 0; i < this.tiles.length; i++) {
+            for (int j = 0; j < this.tiles[0].length; j++) {
+                this.tiles[i][j] = new Tile();
             }
         }
     }
 
     //check for horizontal win
     private boolean findHorizontalWin(final Shapes shape) {
-        for (int i = 0; i < tiles.length; i++) {
+        for (int i = 0; i < this.tiles.length; i++) {
             int numberOfTilesOccupied = 0;
-            for (int k = 1; k < tiles[0].length; k++) {
-                if (!tiles[i][k - 1].tileNotOccupied() && !tiles[i][k].tileNotOccupied()) {
-                    if (tiles[i][k - 1].shapeOnTile().getShape() == tiles[i][k].shapeOnTile().getShape()
-                    && tiles[i][k].shapeOnTile().getShape() == shape) {
+            for (int k = 1; k < this.tiles[0].length; k++) {
+                if (!this.tiles[i][k - 1].tileNotOccupied() && !this.tiles[i][k].tileNotOccupied()) {
+                    if (this.tiles[i][k - 1].shapeOnTile().getShape() == this.tiles[i][k].shapeOnTile().getShape()
+                    && this.tiles[i][k].shapeOnTile().getShape() == shape) {
                         numberOfTilesOccupied++;
                     }
                     if (numberOfTilesOccupied == this.grid - 1) {
@@ -49,12 +54,12 @@ public final class Board implements Cloneable {
 
     //check for vertical win
     private boolean findVerticalWin(final Shapes shape){
-        for (int i = 0; i < tiles.length; i++) {
+        for (int i = 0; i < this.tiles.length; i++) {
             int numberOfTilesOccupied = 0;
-            for (int k = 1; k < tiles[0].length; k++) {
-                if (!tiles[k - 1][i].tileNotOccupied() && !tiles[k][i].tileNotOccupied()) {
-                    if (tiles[k - 1][i].shapeOnTile().getShape() == tiles[k][i].shapeOnTile().getShape()
-                    && tiles[k][i].shapeOnTile().getShape() == shape) {
+            for (int k = 1; k < this.tiles[0].length; k++) {
+                if (!this.tiles[k - 1][i].tileNotOccupied() && !this.tiles[k][i].tileNotOccupied()) {
+                    if (this.tiles[k - 1][i].shapeOnTile().getShape() == this.tiles[k][i].shapeOnTile().getShape()
+                    && this.tiles[k][i].shapeOnTile().getShape() == shape) {
                         numberOfTilesOccupied++;
                     }
                     if (numberOfTilesOccupied == this.grid - 1) {
@@ -69,10 +74,10 @@ public final class Board implements Cloneable {
     //check for top left to bottom right
     private boolean findTopLeftBottomRight(final Shapes shape) {
         int numberOfTilesOccupied = 0;
-        for (int k = 1; k < tiles.length; k++) {
-            if (!tiles[k - 1][k - 1].tileNotOccupied() && !tiles[k][k].tileNotOccupied()) {
-                if (tiles[k - 1][k - 1].shapeOnTile().getShape() == tiles[k][k].shapeOnTile().getShape()
-                && tiles[k][k].shapeOnTile().getShape() == shape) {
+        for (int k = 1; k < this.tiles.length; k++) {
+            if (!this.tiles[k - 1][k - 1].tileNotOccupied() && !this.tiles[k][k].tileNotOccupied()) {
+                if (this.tiles[k - 1][k - 1].shapeOnTile().getShape() == this.tiles[k][k].shapeOnTile().getShape()
+                && this.tiles[k][k].shapeOnTile().getShape() == shape) {
                     numberOfTilesOccupied++;
                 } else {
                     return false;
@@ -88,11 +93,11 @@ public final class Board implements Cloneable {
     //check from top right to bottom left
     private boolean findTopRightBottomLeft(final Shapes shape) {
         int numberOfTilesOccupied = 0;
-        int maxSize = tiles[0].length - 1;
-        for (int k = 0; k < tiles.length - 1; k++) {
-            if (!tiles[k][maxSize].tileNotOccupied() && !tiles[k + 1][maxSize - 1].tileNotOccupied()) {
-                if (tiles[k][maxSize].shapeOnTile().getShape() == tiles[k + 1][maxSize - 1].shapeOnTile().getShape()
-                && tiles[k + 1][maxSize - 1].shapeOnTile().getShape() == shape) {
+        int maxSize = this.tiles[0].length - 1;
+        for (int k = 0; k < this.tiles.length - 1; k++) {
+            if (!this.tiles[k][maxSize].tileNotOccupied() && !this.tiles[k + 1][maxSize - 1].tileNotOccupied()) {
+                if (this.tiles[k][maxSize].shapeOnTile().getShape() == this.tiles[k + 1][maxSize - 1].shapeOnTile().getShape()
+                && this.tiles[k + 1][maxSize - 1].shapeOnTile().getShape() == shape) {
                     numberOfTilesOccupied++;
                     maxSize--;
                 } else {
@@ -111,9 +116,9 @@ public final class Board implements Cloneable {
     }
 
     protected boolean isDraw() {
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[0].length; j++) {
-                if (tiles[i][j].tileNotOccupied()) {
+        for (int i = 0; i < this.tiles.length; i++) {
+            for (int j = 0; j < this.tiles[0].length; j++) {
+                if (this.tiles[i][j].tileNotOccupied()) {
                     return false;
                 }
             }

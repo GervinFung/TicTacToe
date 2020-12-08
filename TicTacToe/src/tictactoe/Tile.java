@@ -2,27 +2,31 @@ package tictactoe;
 
 public final class Tile implements Cloneable{
     // store the shape on the tile
-    private Shape shapeOnTile;
-    private int x, y;
+    private final Shape shapeOnTile;
+    private final int x, y;
+    public Tile(final Shape shape, final int x, final int y) {
+        this.shapeOnTile = shape;
+        this.x = x;
+        this.y = y;
+    }
+    public Tile() {
+        this.shapeOnTile = null;
+        this.x = this.y = -1;
+    }
     protected boolean tileNotOccupied() {
         return this.shapeOnTile == null;
     }
     protected Shape shapeOnTile() {
         return this.shapeOnTile;
     }
-    protected void setShapeOnTile(final Shape shape) {
-        this.shapeOnTile = shape;
-    }
+
     protected int getX() {
         return this.x;
     }
     protected int getY() {
         return this.y;
     }
-    protected void setCoordinate(final int x, final int y) {
-        this.x = x;
-        this.y = y;
-    }
+
     @Override
     public Object clone(){
         try {

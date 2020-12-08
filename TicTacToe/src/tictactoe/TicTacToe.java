@@ -21,7 +21,7 @@ import java.awt.Color;
 
 public final class TicTacToe implements ActionListener{
 
-    private final Board board;
+    private Board board;
     private JButton[] buttons;
     private boolean againstAI, aiFirst;
     private double divisor;
@@ -33,7 +33,7 @@ public final class TicTacToe implements ActionListener{
 
 
     public TicTacToe() {
-        this.board = new Board();
+        this.board = new Board(3);
         this.jf = new JFrame("Tic Tac Toe");
         this.divisor = 0;
         //initialise menu
@@ -98,7 +98,7 @@ public final class TicTacToe implements ActionListener{
 
         this.jf.setJMenuBar(menuBar);
 
-        this.board.setGrid(size);
+        this.board = new Board(size);
         this.buttons = new JButton[size * size];
         this.board.createBoard();
         this.jf.setSize(600, 600);
@@ -112,10 +112,10 @@ public final class TicTacToe implements ActionListener{
         this.jf.setVisible(true);
 
         if (this.aiFirst) {
-            AImove(this.buttons[2]);
+            this.AImove(this.buttons[2]);
         }
         final MouseAction ma = new MouseAction(this.divisor, this.againstAI, this.board);
-        addMouseActionListener(ma);
+        this.addMouseActionListener(ma);
     }
 
     private void changeButtonAvailability(final JButton[] buttons, final boolean enable) {
@@ -222,7 +222,7 @@ public final class TicTacToe implements ActionListener{
         final Tile chosenTile = ai.getChosenTile();
         final int chosenY = chosenTile.getY(), chosenX = chosenTile.getX();
 
-        this.board.getTileOn(chosenX, chosenY).setShapeOnTile(chosenTile.shapeOnTile());
+        this.board.createShape(chosenTile.shapeOnTile(), chosenX, chosenY);
 
         final ImageIcon aiIcon = getResizedImageIcon(button, "shape_image/O.png");
         displayShape(this.buttons, chosenTile, aiIcon);
@@ -257,7 +257,7 @@ public final class TicTacToe implements ActionListener{
                     final Shapes shape = (this.firstPlayer) ? Shapes.X : Shapes.O;
                     final int value = (this.firstPlayer) ? -1 : 1;
 
-                    this.board.getTileOn(x, y).setShapeOnTile(new Shape(shape, value));
+                    this.board.createShape(new Shape(shape, value), x, y);
 
                     final ImageIcon icon = getResizedImageIcon(button, imagePath);
                     button.setIcon(icon);
@@ -270,7 +270,7 @@ public final class TicTacToe implements ActionListener{
                 }
                 if (this.againstAI) {
 
-                    this.board.getTileOn(x, y).setShapeOnTile(new Shape(Shapes.X, -1));
+                    this.board.createShape(new Shape(Shapes.X, -1), x, y);
 
                     final ImageIcon icon = getResizedImageIcon(button, "shape_image/X.png");
                     button.setIcon(icon);
@@ -282,9 +282,6 @@ public final class TicTacToe implements ActionListener{
                         AImove(button);
                     }
                 }
-
-            } else {
-                JOptionPane.showMessageDialog(null, "Bruh, seriously? It is occupied");
             }
         }
     }

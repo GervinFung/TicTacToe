@@ -16,10 +16,14 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
 ## To start the game
 
 This game allows user to choose between playing against AI or another friend
-1. There is an option in the menu that allow user to choose whether to play againt AI or friend
-2. After that, user must choose the grid layout before they can start the game, which range from 3x3 to 6x6
-3. The game will restart if there's a winner or it is a draw
+No. | Steps
+--- | ---
+1.| There is an option in the menu that allow user to choose whether to play againt AI or friend
+2.| After that, user must choose the grid layout before they can start the game, which range from 3x3 to 6x6
+3.| The game will restart if there's a winner or it is a draw
 
 ## The AI gets weaker as grid increase
-1. The AI will only prevent user from winning from 4x4 to 6x6 grid
-2. However the AI will want to win if its 3x3 grid layout
+No. | AI
+--- | ---
+1.| The AI will only prevent user from winning from 4x4 to 6x6 grid
+2.| However the AI will want to win if its 3x3 grid layout

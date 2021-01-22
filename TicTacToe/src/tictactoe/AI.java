@@ -2,6 +2,8 @@ package tictactoe;
 
 import tictactoe.Shape.Shapes;
 
+import java.util.Objects;
+
 public final class AI {
 
     private final int tilesNumber;
@@ -19,16 +21,16 @@ public final class AI {
     }
 
     private int max(final Board board, final int depth, final Shapes shape, int alpha, final int beta) {
-            if (board.isWin(shape)) {
-                if (shape == Shapes.X) {
-                    return -10 + depth;
-                }
+        if (board.isWin(shape)) {
+            if (shape == Shapes.X) {
+                return -10 + depth;
             }
-            else if (board.isDraw()) {
-                if (shape == Shapes.X) {
-                    return -0 + depth;
-                }
+        }
+        else if (board.isDraw()) {
+            if (shape == Shapes.X) {
+                return depth;
             }
+        }
         //cpu can search until the end if grid is 3
         if (depth == 0 && this.tilesNumber > 3) {
             return evaluationBoard(board);
@@ -41,7 +43,7 @@ public final class AI {
                     //make move
                     board.createShape(new Shape(Shapes.O, 1), i, j);
                     //calculate score
-                    final int score = min((Board)board.clone(), depth - 1, Shapes.O, alpha, beta);
+                    final int score = min((Board) Objects.requireNonNull(board.clone()), depth - 1, Shapes.O, alpha, beta);
                     //undo move
                     board.createShape(null, i, j);
                     bestScore = Math.max(score, bestScore);
@@ -63,7 +65,7 @@ public final class AI {
         }
         else if (board.isDraw()) {
             if (shape == Shapes.O) {
-                return 0 - depth;
+                return -depth;
             }
         }
         //cpu can search until the end if grid is 3
@@ -79,7 +81,7 @@ public final class AI {
                     board.createShape(new Shape(Shapes.X, -1), i, j);
 
                     //calculate score
-                    final int score = max((Board)board.clone(), depth - 1, Shapes.X, alpha, beta);
+                    final int score = max((Board) Objects.requireNonNull(board.clone()), depth - 1, Shapes.X, alpha, beta);
                     //undo move
                     board.createShape(null, i, j);
                     bestScore = Math.min(score, bestScore);
@@ -105,7 +107,7 @@ public final class AI {
 
                     final Tile tempTile = (Tile)board.getTileOn(i, j).clone();
                     //calculate score
-                    final int score = min((Board)board.clone(), 4, Shapes.O, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                    final int score = min((Board) Objects.requireNonNull(board.clone()), 4, Shapes.O, Integer.MIN_VALUE, Integer.MAX_VALUE);
                     //undo move
                     board.createShape(null, i, j);
                     if (score > bestScore) {

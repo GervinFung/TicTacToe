@@ -16,9 +16,6 @@ public final class Board implements Cloneable {
         return this.grid;
     }
 
-    protected Tile[][] getTiles() {
-        return this.tiles;
-    }
     protected Tile getTileOn(final int x, final int y) {
         return this.tiles[y][x];
     }
@@ -35,12 +32,12 @@ public final class Board implements Cloneable {
 
     //check for horizontal win
     private boolean findHorizontalWin(final Shapes shape) {
-        for (int i = 0; i < this.tiles.length; i++) {
+        for (final Tile[] tile : this.tiles) {
             int numberOfTilesOccupied = 0;
             for (int k = 1; k < this.tiles[0].length; k++) {
-                if (!this.tiles[i][k - 1].tileNotOccupied() && !this.tiles[i][k].tileNotOccupied()) {
-                    if (this.tiles[i][k - 1].shapeOnTile().getShape() == this.tiles[i][k].shapeOnTile().getShape()
-                    && this.tiles[i][k].shapeOnTile().getShape() == shape) {
+                if (!tile[k - 1].tileNotOccupied() && !tile[k].tileNotOccupied()) {
+                    if (tile[k - 1].shapeOnTile().getShape() == tile[k].shapeOnTile().getShape()
+                            && tile[k].shapeOnTile().getShape() == shape) {
                         numberOfTilesOccupied++;
                     }
                     if (numberOfTilesOccupied == this.grid - 1) {
@@ -116,9 +113,9 @@ public final class Board implements Cloneable {
     }
 
     protected boolean isDraw() {
-        for (int i = 0; i < this.tiles.length; i++) {
-            for (int j = 0; j < this.tiles[0].length; j++) {
-                if (this.tiles[i][j].tileNotOccupied()) {
+        for (final Tile[] tiles : this.tiles) {
+            for (final Tile tile : tiles) {
+                if (tile.tileNotOccupied()) {
                     return false;
                 }
             }

@@ -1,5 +1,6 @@
 package tictactoe;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,9 +16,10 @@ import javax.swing.JOptionPane;
 import tictactoe.Shape.Shapes;
 
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.io.IOException;
+import java.util.Objects;
 
 public final class TicTacToe implements ActionListener{
 
@@ -30,7 +32,6 @@ public final class TicTacToe implements ActionListener{
     private final JMenuItem[] grids;
     private final JMenuItem friend, AI;
     private final JMenu opponent, grid;
-
 
     public TicTacToe() {
         this.board = new Board(3);
@@ -75,8 +76,8 @@ public final class TicTacToe implements ActionListener{
     //remove all grids previouslt added into grid
     //for restarting new game
     private void removeButton() {
-        for (int i = 0; i < this.buttons.length; i++) {
-            this.jf.remove(this.buttons[i]);
+        for (final JButton button : this.buttons) {
+            this.jf.remove(button);
         }
         this.grid.removeAll();
     }
@@ -140,9 +141,9 @@ public final class TicTacToe implements ActionListener{
 
     @Override
     public void actionPerformed(final ActionEvent event) {
-        for (int i = 0; i < grids.length; i++) {
-            if (event.getSource().equals(grids[i])) {
-                final int size = Integer.parseInt(grids[i].getName());
+        for (final JMenuItem jMenuItem : grids) {
+            if (event.getSource().equals(jMenuItem)) {
+                final int size = Integer.parseInt(jMenuItem.getName());
                 removeButton();
                 startGame(size);
                 changeButtonAvailability(this.buttons, true);
@@ -168,8 +169,8 @@ public final class TicTacToe implements ActionListener{
     }
 
     private void addMouseActionListener(final MouseAction mouseAction) {
-        for (int i = 0; i < this.buttons.length; i++) {
-            this.buttons[i].addActionListener(mouseAction);
+        for (final JButton button : this.buttons) {
+            button.addActionListener(mouseAction);
         }
     }
 
@@ -182,9 +183,10 @@ public final class TicTacToe implements ActionListener{
 
     //get the resized image
     private ImageIcon getResizedImageIcon(final JButton button, final String path) {
-        final File file = new File(path);
-        final String imagePath = file.getAbsolutePath();
-        return resizeIcon(new ImageIcon(imagePath), button.getWidth(), button.getHeight());
+        try {
+            return resizeIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource(path)))), button.getWidth(), button.getHeight());
+        } catch (final IOException | NullPointerException e) { e.printStackTrace(); }
+        return null;
     }
 
     private boolean isGameOver(final Shapes shape, final Board board) {

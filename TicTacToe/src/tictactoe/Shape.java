@@ -4,9 +4,7 @@ public final class Shape {
 
     private final Shapes shape;
     private final int score;
-    public enum Shapes{
-        X,O
-    }
+    public enum Shapes{X,O}
 
     protected Shapes getShape() {
         return this.shape;

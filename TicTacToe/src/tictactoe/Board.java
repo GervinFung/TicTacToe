@@ -16,12 +16,10 @@ public final class Board implements Cloneable {
         return this.grid;
     }
 
-    protected Tile getTileOn(final int x, final int y) {
-        return this.tiles[y][x];
-    }
-    protected void createShape(final Shape shape, final int x, final int y) {
-        this.tiles[y][x] = new Tile(shape, x, y);
-    }
+    protected Tile getTileOn(final int x, final int y) { return this.tiles[y][x]; }
+
+    protected void createShape(final Shape shape, final int x, final int y) { this.tiles[y][x] = new Tile(shape, x, y); }
+
     protected void createBoard() {
         for (int i = 0; i < this.tiles.length; i++) {
             for (int j = 0; j < this.tiles[0].length; j++) {

@@ -20,13 +20,13 @@ No. | Steps
 --- | ---
 1.| Double click TicTacToe.jar file
 2.| There is an option in the menu that allow user to choose whether to play againt AI or friend
-3.| After that, user must choose the grid layout before they can start the game, which range from 3x3 to 6x6
+3.| After that, user must choose the grid layout before they can start the game, which range from 3x3 and above
 4.| The game will restart if there's a winner or it is a draw
 
 ## The AI gets weaker as grid increase
 No. | AI
 --- | ---
-1.| The AI will only prevent user from winning from 4x4 to 6x6 grid
+1.| The AI will only prevent user from winning from 4x4 and above grid
 2.| However the AI will want to win if its 3x3 grid layout
 
 ![3x3 sample](3x3.png)

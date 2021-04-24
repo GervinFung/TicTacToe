@@ -7,17 +7,9 @@ import java.util.Objects;
 public final class AI {
 
     private final int tilesNumber;
-    private Tile chosenTile;
 
     public AI(final int tilesNumber) {
         this.tilesNumber = tilesNumber;
-    }
-    private void setTile(final Tile chosenTile) {
-        this.chosenTile = chosenTile;
-    }
-
-    protected Tile getChosenTile() {
-        return this.chosenTile;
     }
 
     private int max(final Board board, final int depth, final Shapes shape, int alpha, final int beta) {
@@ -95,9 +87,10 @@ public final class AI {
         return bestScore;
     }
 
-    protected void bestMove(final Board board) {
+    protected Tile bestMove(final Board board) {
         final int grid = this.tilesNumber;
         int bestScore = Integer.MIN_VALUE;
+        Tile chosenTile = null;
         for (int i = 0; i < grid; i++) {
             for (int j = 0; j < grid; j++) {
                 if (board.getTileOn(i, j).tileNotOccupied()) {
@@ -112,11 +105,12 @@ public final class AI {
                     board.createShape(null, i, j);
                     if (score > bestScore) {
                         bestScore = score;
-                        this.setTile(tempTile);
+                        chosenTile = tempTile;
                     }
                 }
             }
         }
+        return chosenTile;
     }
 
     private int evaluationBoard(final Board board) {

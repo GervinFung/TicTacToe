@@ -9,23 +9,13 @@ public final class Tile implements Cloneable{
         this.x = x;
         this.y = y;
     }
-    public Tile() {
-        this.shapeOnTile = null;
-        this.x = this.y = -1;
-    }
-    protected boolean tileNotOccupied() {
-        return this.shapeOnTile == null;
-    }
-    protected Shape shapeOnTile() {
-        return this.shapeOnTile;
-    }
+    public Tile() { this(null, -1, -1); }
 
-    protected int getX() {
-        return this.x;
-    }
-    protected int getY() {
-        return this.y;
-    }
+    protected boolean tileNotOccupied() { return this.shapeOnTile == null; }
+    protected Shape shapeOnTile() { return this.shapeOnTile; }
+
+    protected int getX() { return this.x; }
+    protected int getY() { return this.y; }
 
     @Override
     public Object clone(){

@@ -8,8 +8,7 @@ public final class Board implements Cloneable {
 
     public Board(final int grid) {
         this.grid = grid;
-        this.tiles = new Tile[this.grid][this.grid];
-        createBoard();
+        this.tiles = createBoard();
     }
 
     protected int getGrid() {
@@ -20,12 +19,14 @@ public final class Board implements Cloneable {
 
     protected void createShape(final Shape shape, final int x, final int y) { this.tiles[y][x] = new Tile(shape, x, y); }
 
-    protected void createBoard() {
-        for (int i = 0; i < this.tiles.length; i++) {
-            for (int j = 0; j < this.tiles[0].length; j++) {
-                this.tiles[i][j] = new Tile();
+    private Tile[][] createBoard() {
+        final Tile[][] tiles = new Tile[this.grid][this.grid];
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[0].length; j++) {
+                tiles[i][j] = new Tile();
             }
         }
+        return tiles;
     }
 
     //check for horizontal win

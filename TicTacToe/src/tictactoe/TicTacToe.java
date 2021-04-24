@@ -40,7 +40,7 @@ public final class TicTacToe implements ActionListener{
     private final JMenuItem friend, AI;
     private final JMenu opponent, grid;
 
-    public TicTacToe() {
+    private TicTacToe() {
         this.board = new Board(3);
         this.jf = new JFrame("Tic Tac Toe");
         this.divisor = 0;
@@ -64,7 +64,7 @@ public final class TicTacToe implements ActionListener{
         button.addActionListener((event)-> {
             this.removeButton();
             this.changeButtonAvailability(this.tileButtons, true);
-            this.startGame((Integer)this.gridLevel.getValue());
+            invokeGame((Integer)this.gridLevel.getValue());
         });
 
         this.opponent.add(this.AI);
@@ -74,7 +74,16 @@ public final class TicTacToe implements ActionListener{
         this.jf.setJMenuBar(addMenuOptionIntoMenu());
     }
 
-    public static void main(final String[] args) { new TicTacToe().startGame(3); }
+    private static void invokeGame(final int size) {
+        SwingUtilities.invokeLater(() -> getSingletonInstance().startGame(size));
+    }
+
+    //singleton
+    public static TicTacToe getSingletonInstance() { return SingleTon.INSTANCE; }
+
+    private static final class SingleTon { private static final TicTacToe INSTANCE = new TicTacToe();}
+
+    public static void main(final String[] args) { invokeGame(3); }
 
     //instantiate the buttons and add into JFrame
     private void initialiseButton(final JFrame jf) {
@@ -105,7 +114,6 @@ public final class TicTacToe implements ActionListener{
 
         this.board = new Board(size);
         this.tileButtons = new TileButton[size * size];
-        this.board.createBoard();
         this.jf.setSize(DIMENSION, DIMENSION);
         this.jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.jf.setLayout(new GridLayout(size, size, 0, 0));
@@ -207,8 +215,7 @@ public final class TicTacToe implements ActionListener{
         final AI ai = new AI((int)Math.sqrt(this.tileButtons.length));
 
         //clone board so it wont affect the real board
-        ai.bestMove((Board)this.board.clone());
-        final Tile chosenTile = ai.getChosenTile();
+        final Tile chosenTile = ai.bestMove((Board)this.board.clone());
         final int chosenY = chosenTile.getY(), chosenX = chosenTile.getX();
 
         this.board.createShape(chosenTile.shapeOnTile(), chosenX, chosenY);
@@ -217,7 +224,7 @@ public final class TicTacToe implements ActionListener{
         displayShape(this.tileButtons, chosenTile, aiIcon);
         if (isGameOver(Shapes.O, board)) {
             removeButton();
-            startGame(this.board.getGrid());
+            invokeGame(this.board.getGrid());
         }
     }
     
@@ -242,7 +249,7 @@ public final class TicTacToe implements ActionListener{
                         final boolean gameOver = isGameOver(shape, board);
                         if (gameOver) {
                             removeButton();
-                            startGame(board.getGrid());
+                            invokeGame(board.getGrid());
                         }
                         firstPlayer = !firstPlayer;
                     }
@@ -250,12 +257,11 @@ public final class TicTacToe implements ActionListener{
 
                         board.createShape(new Shape(Shapes.X, -1), x, y);
 
-                        final ImageIcon icon = getResizedImageIcon(this, "shape_image/X.png");
-                        this.setIcon(icon);
+                        this.setIcon(getResizedImageIcon(this, "shape_image/X.png"));
                         final boolean gameOver = isGameOver(Shapes.X, board);
                         if (gameOver) {
                             removeButton();
-                            startGame(board.getGrid());
+                            invokeGame(board.getGrid());
                         } else {
                             SwingUtilities.invokeLater(() -> AImove(this));
                         }

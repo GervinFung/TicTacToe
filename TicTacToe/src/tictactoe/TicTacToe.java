@@ -16,67 +16,100 @@ import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import tictactoe.Shape.Shapes;
 
 import java.awt.Toolkit;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
-public final class TicTacToe implements ActionListener{
+public final class TicTacToe {
 
     private static final int DIMENSION = Toolkit.getDefaultToolkit().getScreenSize().height - 50;
 
-    private Board board;
-    private TileButton[] tileButtons;
-    private boolean againstAI, aiFirst, firstPlayer;
-    private int divisor;
-    private final JFrame jf;
+    private enum PLAYER {
+        FIRST {
+            @Override
+            PLAYER getOpponent() { return SECOND; }
+            @Override
+            boolean isFirstPlayer() { return true; }
+        }, SECOND {
+            @Override
+            PLAYER getOpponent() { return FIRST; }
+            @Override
+            boolean isFirstPlayer() { return false; }
+        };
+        abstract PLAYER getOpponent();
+        abstract boolean isFirstPlayer();
+    }
 
-    private final JSpinner gridLevel;
-    private final JMenuItem friend, AI;
-    private final JMenu opponent, grid;
+    private Board board;
+    private final List<TileButton> tileButtons;
+    private boolean againstAI, aiFirst, aiThinking;
+    private PLAYER currentPlayer;
+    private final JFrame jf;
+    private final PropertyChangeSupport propertyChangeSupport;
 
     private TicTacToe() {
+        this.aiThinking = false;
+        this.currentPlayer = PLAYER.FIRST;
         this.board = new Board(3);
+
         this.jf = new JFrame("Tic Tac Toe");
-        this.divisor = 0;
+        this.tileButtons = new ArrayList<>();
 
-        //initialise menu
-        this.grid = new JMenu("Grid");
-        this.opponent = new JMenu("Opponent");
-
-        //initialise menu item
-        this.friend = new JMenuItem("Friend");
-        this.AI = new JMenuItem("AI");
-
-        //add action listener to menu item
-        this.AI.addActionListener(this);
-        this.friend.addActionListener(this);
-
-        //grid level button
-        this.gridLevel = new JSpinner(new SpinnerNumberModel(3, 3, Integer.MAX_VALUE, 1));
-
-        final Button button = new Button("Ok");
-        button.addActionListener((event)-> {
-            this.removeButton();
-            this.changeButtonAvailability(this.tileButtons, true);
-            invokeGame((Integer)this.gridLevel.getValue());
-        });
-
-        this.opponent.add(this.AI);
-        this.opponent.add(this.friend);
-        this.grid.add(this.gridLevel);
-        this.grid.add(button);
         this.jf.setJMenuBar(addMenuOptionIntoMenu());
+        final PropertyChangeListener gameSetupPropertyChangeListener = propertyChangeEvent -> {
+            if (againstAI) {
+                this.aiThinking = true;
+                SwingUtilities.invokeLater(() -> new AIThinkTank().execute());
+            }
+        };
+
+        this.propertyChangeSupport = new PropertyChangeSupport(gameSetupPropertyChangeListener);
+        this.propertyChangeSupport.addPropertyChangeListener(gameSetupPropertyChangeListener);
     }
 
-    private static void invokeGame(final int size) {
-        SwingUtilities.invokeLater(() -> getSingletonInstance().startGame(size));
+    private final class AIThinkTank extends SwingWorker<Tile, Void> {
+        @Override
+        public Tile doInBackground() {
+            //clone board so it wont affect the real board
+             return new AI().bestMove(new Board(TicTacToe.this.board));
+        }
+
+        @Override
+        public void done() {
+            try {
+                final Tile chosenTile = this.get();
+                TicTacToe.this.board.createShape(chosenTile.shapeOnTile(), chosenTile.getIndex());
+
+                final TileButton button = TicTacToe.this.tileButtons.get(chosenTile.getIndex());
+
+                final ImageIcon aiIcon = getResizedImageIcon(button, "shape_image/O.png");
+                button.setIcon(aiIcon);
+
+                if (isGameOver(Shapes.O, board)) {
+                    removeButton();
+                    invokeGame(TicTacToe.this.board.getGrid());
+                }
+
+                TicTacToe.this.aiThinking = false;
+
+            } catch (final InterruptedException | ExecutionException ignored) {}
+        }
     }
+
+
+    private static void invokeGame(final int size) { SwingUtilities.invokeLater(() -> getSingletonInstance().startGame(size)); }
+
+    private void fireAI() { this.propertyChangeSupport.firePropertyChange(null, null, null); }
 
     //singleton
     public static TicTacToe getSingletonInstance() { return SingleTon.INSTANCE; }
@@ -86,51 +119,87 @@ public final class TicTacToe implements ActionListener{
     public static void main(final String[] args) { invokeGame(3); }
 
     //instantiate the buttons and add into JFrame
-    private void initialiseButton(final JFrame jf) {
-        for (int i = 0; i < this.tileButtons.length; i++) {
-            this.tileButtons[i] = new TileButton(i);
-            this.tileButtons[i].setBackground(Color.WHITE);
-            jf.add(this.tileButtons[i]);
+    private void initialiseButton() {
+        for (int i = 0; i < this.board.getSize(); i++) {
+            this.tileButtons.add(new TileButton(i));
+            this.jf.add(this.tileButtons.get(i));
         }
     }
 
     //for restarting new game
-    private void removeButton() {
-        for (final TileButton button : this.tileButtons) {
-            this.jf.remove(button);
-        }
-    }
+    private void removeButton() { this.tileButtons.forEach(this.jf::remove); }
 
     //add all menu into menu bar
     private JMenuBar addMenuOptionIntoMenu() {
         final JMenuBar menuBar = new JMenuBar();
         menuBar.setBackground(Color.WHITE);
-        menuBar.add(this.opponent);
-        menuBar.add(this.grid);
+        menuBar.add(this.chooseOpponent());
+        menuBar.add(this.chooseGrid());
         return menuBar;
+    }
+
+    private JMenu chooseGrid() {
+        final JMenu grid = new JMenu("Grid");
+
+        final JSpinner gridLevel = new JSpinner(new SpinnerNumberModel(3, 3, Integer.MAX_VALUE, 1));
+        final Button button = new Button("Ok");
+        button.addActionListener((event)-> {
+            this.removeButton();
+            this.changeButtonAvailability(true);
+            invokeGame((Integer)gridLevel.getValue());
+        });
+
+        grid.add(gridLevel);
+        grid.add(button);
+
+        return grid;
+    }
+
+    private JMenu chooseOpponent() {
+        final JMenu opponent = new JMenu("Opponent");
+
+        final JMenuItem human = new JMenuItem("Human");
+        human.addActionListener(e -> {
+            this.againstAI = false;
+            JOptionPane.showMessageDialog(this.jf, "Select Grid To Start Game. You can only start playing by selecting the grid");
+            changeButtonAvailability(false);
+            this.aiThinking = false;
+        });
+
+        final JMenuItem ai = new JMenuItem("AI");
+        ai.addActionListener(e -> {
+            this.againstAI = true;
+            this.aiFirst = askPlayRole() == 1;
+            JOptionPane.showMessageDialog(this.jf, "Select Grid To Start Game. You can only start playing by selecting the grid");
+            changeButtonAvailability(false);
+        });
+
+        opponent.add(ai);
+        opponent.add(human);
+
+        return opponent;
     }
 
     protected void startGame(final int size) {
 
         this.board = new Board(size);
-        this.tileButtons = new TileButton[size * size];
+        this.tileButtons.clear();
         this.jf.setSize(DIMENSION, DIMENSION);
         this.jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.jf.setLayout(new GridLayout(size, size, 0, 0));
-        this.divisor = size;
-        this.initialiseButton(this.jf);
+        this.initialiseButton();
         this.jf.setLocationRelativeTo(null);
         this.jf.setBackground(Color.black);
         this.jf.setResizable(false);
         this.jf.setVisible(true);
 
-        if (this.aiFirst) {
-            this.AImove(this.tileButtons[2]);
-        }
+        this.currentPlayer = PLAYER.FIRST;
+
+        if (aiFirst) { this.fireAI(); }
     }
 
-    private void changeButtonAvailability(final TileButton[] buttons, final boolean enable) {
-        for (final TileButton jButton : buttons) {
+    private void changeButtonAvailability(final boolean enable) {
+        for (final TileButton jButton : this.tileButtons) {
             if (enable) {
                 jButton.setBackground(Color.white);
             } else {
@@ -142,31 +211,10 @@ public final class TicTacToe implements ActionListener{
 
     private int askPlayRole() {
         while (true) {
-            final int playAsX = JOptionPane.showConfirmDialog(null, "Play as X?");
-            if (playAsX == 1 || playAsX == 0) {
-                return playAsX;
+            final int playAsFirst = JOptionPane.showConfirmDialog(null, "Play as First Player?");
+            if (playAsFirst == 1 || playAsFirst == 0) {
+                return playAsFirst;
             }
-        }
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent event) {
-        if (event.getSource().equals(this.friend)) {
-            this.againstAI = false;
-            JOptionPane.showMessageDialog(this.jf, "Select Grid To Start Game. You can only start playing by selecting the grid");
-            changeButtonAvailability(this.tileButtons, false);
-        }
-        if (event.getSource().equals(this.AI)) {
-            this.againstAI = true;
-            final int playAsX = askPlayRole();
-            if (playAsX == 1) {
-                this.aiFirst = true;
-            }
-            else if (playAsX == 0) {
-                this.aiFirst = false;
-            }
-            JOptionPane.showMessageDialog(this.jf, "Select Grid To Start Game. You can only start playing by selecting the grid");
-            changeButtonAvailability(this.tileButtons, false);
         }
     }
 
@@ -198,52 +246,19 @@ public final class TicTacToe implements ActionListener{
         return false;
     }
 
-    private void displayShape(final TileButton[] button, final Tile tile, final ImageIcon aiIcon) {
-        final int tilesNumber = (int)Math.sqrt(button.length);
-        final int x = tile.getX(), y = tile.getY();
-        for (int i = 0; i < button.length; i++) {
-            final int X = i % tilesNumber;
-            final int Y = i / tilesNumber;
-            if (X == x && Y == y) {
-                tileButtons[i].setIcon(aiIcon);
-                return ;
-            }
-        }
-    }
-
-    private void AImove(final TileButton button) {
-        final AI ai = new AI((int)Math.sqrt(this.tileButtons.length));
-
-        //clone board so it wont affect the real board
-        final Tile chosenTile = ai.bestMove((Board)this.board.clone());
-        final int chosenY = chosenTile.getY(), chosenX = chosenTile.getX();
-
-        this.board.createShape(chosenTile.shapeOnTile(), chosenX, chosenY);
-
-        final ImageIcon aiIcon = getResizedImageIcon(button, "shape_image/O.png");
-        displayShape(this.tileButtons, chosenTile, aiIcon);
-        if (isGameOver(Shapes.O, board)) {
-            removeButton();
-            invokeGame(this.board.getGrid());
-        }
-    }
-    
     private final class TileButton extends JButton {
         private TileButton(final int i) {
+            this.setBackground(Color.WHITE);
             this.addActionListener(actionEvent -> {
 
-                final int x = i % divisor;
-                final int y = i / divisor;
-
-                if (board.getTileOn(x, y).tileNotOccupied()) {
+                if (board.getTileOn(i).tileNotOccupied() && !aiThinking) {
 
                     if (!againstAI) {
 
-                        final String imagePath = (firstPlayer) ? "shape_image/X.png" : "shape_image/O.png";
-                        final Shapes shape = (firstPlayer) ? Shapes.X : Shapes.O;
-                        final int value = (firstPlayer) ? -1 : 1;
+                        final String imagePath = (currentPlayer.isFirstPlayer()) ? "shape_image/X.png" : "shape_image/O.png";
+                        final Shapes shape = (currentPlayer.isFirstPlayer()) ? Shapes.X : Shapes.O;
 
-                        board.createShape(new Shape(shape, value), x, y);
+                        board.createShape(new Shape(shape), i);
 
                         this.setIcon(getResizedImageIcon(this, imagePath));
                         final boolean gameOver = isGameOver(shape, board);
@@ -251,19 +266,21 @@ public final class TicTacToe implements ActionListener{
                             removeButton();
                             invokeGame(board.getGrid());
                         }
-                        firstPlayer = !firstPlayer;
+                        currentPlayer = currentPlayer.getOpponent();
+
                     }
                     if (againstAI) {
 
-                        board.createShape(new Shape(Shapes.X, -1), x, y);
+                        board.createShape(new Shape(Shapes.X), i);
 
                         this.setIcon(getResizedImageIcon(this, "shape_image/X.png"));
+
                         final boolean gameOver = isGameOver(Shapes.X, board);
                         if (gameOver) {
                             removeButton();
                             invokeGame(board.getGrid());
                         } else {
-                            SwingUtilities.invokeLater(() -> AImove(this));
+                            fireAI();
                         }
                     }
                 }

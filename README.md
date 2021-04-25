@@ -15,7 +15,7 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
 
 ## To start the game
 
-This game allows user to choose between playing against AI or another friend
+This is a multithreaded tic-tac-toe game that allows user to choose between playing against AI or another friend
 No. | Steps
 --- | ---
 1.| Double click TicTacToe.jar file

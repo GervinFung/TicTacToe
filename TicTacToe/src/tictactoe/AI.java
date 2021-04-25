@@ -2,126 +2,117 @@ package tictactoe;
 
 import tictactoe.Shape.Shapes;
 
-import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class AI {
 
-    private final int tilesNumber;
-
-    public AI(final int tilesNumber) {
-        this.tilesNumber = tilesNumber;
-    }
-
-    private int max(final Board board, final int depth, final Shapes shape, int alpha, final int beta) {
-        if (board.isWin(shape)) {
-            if (shape == Shapes.X) {
-                return -10 + depth;
-            }
+    private int max(final Board board, final int depth, final int highest, final int lowest) {
+        if (board.isWin(Shapes.X)) {
+            return -10 + depth;
         }
         else if (board.isDraw()) {
-            if (shape == Shapes.X) {
-                return depth;
-            }
+            return depth;
         }
         //cpu can search until the end if grid is 3
-        if (depth == 0 && this.tilesNumber > 3) {
+        if (depth == 0 && board.getGrid() > 3) {
             return evaluationBoard(board);
         }
-        final int grid = this.tilesNumber;
-        int bestScore = Integer.MIN_VALUE;
-        for (int i = 0; i < grid; i++) {
-            for (int j = 0; j < grid; j++) {
-                if (board.getTileOn(i, j).tileNotOccupied()) {
-                    //make move
-                    board.createShape(new Shape(Shapes.O, 1), i, j);
-                    //calculate score
-                    final int score = min((Board) Objects.requireNonNull(board.clone()), depth - 1, Shapes.O, alpha, beta);
-                    //undo move
-                    board.createShape(null, i, j);
-                    bestScore = Math.max(score, bestScore);
-                    alpha = Math.max(alpha, bestScore);
-                    if (beta <= alpha) {
-                        return alpha;
-                    }
+
+        int currentHighest = highest;
+
+        for (final Tile tile : board.getTiles()) {
+            if (tile.tileNotOccupied()) {
+                final Board tempBoard = new Board(board);
+                //make move
+                tempBoard.createShape(new Shape(Shapes.O), tile.getIndex());
+                currentHighest = Math.max(min(tempBoard, depth - 1, currentHighest, lowest), currentHighest);
+                if (currentHighest >= lowest) {
+                    return lowest;
                 }
             }
         }
-        return bestScore;
+
+        return currentHighest;
     }
 
-    private int min (final Board board, final int depth, final Shapes shape, final int alpha, int beta) {
-        if (board.isWin(shape)) {
-            if (shape == Shapes.O) {
-                return 10 - depth;
-            }
+    private int min(final Board board, final int depth, final int highest, final int lowest) {
+        if (board.isWin(Shapes.O)) {
+            return 10 - depth;
         }
         else if (board.isDraw()) {
-            if (shape == Shapes.O) {
-                return -depth;
-            }
+            return -depth;
         }
         //cpu can search until the end if grid is 3
-        if (depth == 0 && this.tilesNumber > 3) {
+        if (depth == 0 && board.getGrid() > 3) {
             return evaluationBoard(board);
         }
-        final int grid = this.tilesNumber;
-        int bestScore = Integer.MAX_VALUE;
-        for (int i = 0; i < grid; i++) {
-            for (int j = 0; j < grid; j++) {
-                if (board.getTileOn(i, j).tileNotOccupied()) {
-                    //make move
-                    board.createShape(new Shape(Shapes.X, -1), i, j);
 
-                    //calculate score
-                    final int score = max((Board) Objects.requireNonNull(board.clone()), depth - 1, Shapes.X, alpha, beta);
-                    //undo move
-                    board.createShape(null, i, j);
-                    bestScore = Math.min(score, bestScore);
-                    beta = Math.min(beta, bestScore);
-                    if (beta <= alpha) {
-                        return beta;
-                    }
+        int currentLowest = lowest;
+
+        for (final Tile tile : board.getTiles()) {
+            if (tile.tileNotOccupied()) {
+                final Board tempBoard = new Board(board);
+                //make move
+                tempBoard.createShape(new Shape(Shapes.X), tile.getIndex());
+                //calculate score
+                currentLowest = Math.min(max(tempBoard, depth - 1, highest, currentLowest), currentLowest);
+                if (currentLowest <= highest) {
+                    return highest;
                 }
             }
         }
-        return bestScore;
+
+        return currentLowest;
     }
 
     protected Tile bestMove(final Board board) {
-        final int grid = this.tilesNumber;
-        int bestScore = Integer.MIN_VALUE;
-        Tile chosenTile = null;
-        for (int i = 0; i < grid; i++) {
-            for (int j = 0; j < grid; j++) {
-                if (board.getTileOn(i, j).tileNotOccupied()) {
 
+        final AtomicInteger bestScore = new AtomicInteger(Integer.MIN_VALUE);
+
+        final AtomicReference<Tile> chosenTile = new AtomicReference<>(null);
+
+        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (final Tile tile : board.getTiles()) {
+
+            if (tile.tileNotOccupied()) {
+
+                executorService.execute(() -> {
+                    final Board tempBoard = new Board(board);
                     //make move
-                    board.createShape(new Shape(Shapes.O, 1), i, j);
+                    tempBoard.createShape(new Shape(Shapes.O), tile.getIndex());
 
-                    final Tile tempTile = (Tile)board.getTileOn(i, j).clone();
-                    //calculate score
-                    final int score = min((Board) Objects.requireNonNull(board.clone()), 4, Shapes.O, Integer.MIN_VALUE, Integer.MAX_VALUE);
-                    //undo move
-                    board.createShape(null, i, j);
-                    if (score > bestScore) {
-                        bestScore = score;
-                        chosenTile = tempTile;
+                    final int score = min(tempBoard, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+                    if (score > bestScore.get()) {
+                        bestScore.set(score);
+                        chosenTile.set(tempBoard.getTileOn(tile.getIndex()));
                     }
-                }
+                });
             }
         }
-        return chosenTile;
+
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return chosenTile.get();
     }
 
     private int evaluationBoard(final Board board) {
         int totalScore = 0;
-        for (int i = 0; i < this.tilesNumber; i++) {
-            for (int j = 0; j < this.tilesNumber; j++) {
-                final Tile tile = board.getTileOn(i, j);
-                if (tile != null) {
-                    if (!tile.tileNotOccupied()) {
-                        totalScore += tile.shapeOnTile().getScore();
-                    }
+        for (int i = 0; i < board.getSize(); i++) {
+            final Tile tile = board.getTileOn(i);
+            if (tile != null) {
+                if (!tile.tileNotOccupied()) {
+                    totalScore += tile.shapeOnTile().getScore();
                 }
             }
         }

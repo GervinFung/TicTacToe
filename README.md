@@ -1,6 +1,6 @@
 ## Getting Started
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+- I have decided to rewrite a TicTacToe game as the previous version is written badly
 
 ## Folder Structure
 
@@ -8,10 +8,7 @@ The workspace contains two folders by default, where:
 
 - `src`: the folder to maintain sources
 - `lib`: the folder to maintain dependencies
-
-## Dependency Management
-
-The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-pack/blob/master/release-notes/v0.9.0.md#work-with-jar-files-directly).
+- `res`: the folder to maintain resources
 
 ## To start the game
 
@@ -19,15 +16,15 @@ This is a multithreaded tic-tac-toe game that allows user to choose between play
 No. | Steps
 --- | ---
 1.| Double click TicTacToe.jar file
-2.| There is an option in the menu that allow user to choose whether to play againt AI or friend
-3.| After that, user must choose the grid layout before they can start the game, which range from 3x3 and above
-4.| The game will restart if there's a winner or it is a draw
+2.| There's a menu that let you decide AI level, Grid Level, Start or Exit Game
+3.| Watch 2 AI play against each other, or play against your friend, or play against AI
+4.| User must choose the grid layout before they can start the game, which range from 3x3 and 10x10
+5.| The game will restart when there's a winner, or it is a draw
 
-## The AI gets weaker as grid increase
-No. | AI
---- | ---
-1.| The AI will only prevent user from winning from 4x4 and above grid
-2.| However the AI will want to win if its 3x3 grid layout
+## The AI gets weaker as grid increase because I could not come up with an evaluation method to check if a board state is good enough
 
 ![3x3 sample](3x3.png)
 ![4x4 sample](4x4.png)
+
+## JAR file location
+[TicTacToe.jar](out/artifacts/TicTacToe_jar/TicTacToe.jar)

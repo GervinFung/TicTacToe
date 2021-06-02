@@ -91,13 +91,13 @@ public final class Board {
         return false;
     }
 
-    private boolean findDiagonalWin(final League league, final boolean findTopRightBottomLeftWin) {
+    private boolean findDiagonalWin(final League league, final boolean findPositiveSlope) {
 
         int numberOfTilesOccupied = 0;
 
-        final int begin = findTopRightBottomLeftWin ? this.grid - 1 : 0;
-        final int max = findTopRightBottomLeftWin ? this.size - 1 : this.size;
-        final int increment = findTopRightBottomLeftWin ? this.grid - 1 : this.grid + 1;
+        final int begin = findPositiveSlope ? this.grid - 1 : 0;
+        final int max = findPositiveSlope ? this.size - 1 : this.size;
+        final int increment = findPositiveSlope ? this.grid - 1 : this.grid + 1;
 
         for (int i = begin; i < max; i += increment) {
 
@@ -117,12 +117,7 @@ public final class Board {
 
     public boolean isWin() { return this.isWin(this.currentPlayer.getOpponent().getLeague()); }
 
-    public boolean isDraw() {
-        for (final Tile tile : this.tileList) {
-            if (tile.tileNotOccupied()) { return false; }
-        }
-        return true;
-    }
+    public boolean isDraw() { return this.tileList.stream().noneMatch(Tile::tileNotOccupied); }
 
     @Override
     public String toString() {

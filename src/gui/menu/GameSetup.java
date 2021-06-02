@@ -61,11 +61,11 @@ public final class GameSetup extends JDialog {
         okButton.setBackground(Color.WHITE);
 
         okButton.addActionListener(e -> {
-            if (this.isAIPlayer(ticTacToe.getBoard().getCurrentPlayer()) && !ticTacToe.isAIStopped()) {
-                ticTacToe.setStopAI(true);
-            }
             this.crossPlayerType = crossComputerButton.isSelected() ? PlayerType.COMPUTER : PlayerType.HUMAN;
             this.noughtPlayerType = noughtComputerButton.isSelected() ? PlayerType.COMPUTER : PlayerType.HUMAN;
+            if (!this.isAIPlayer(ticTacToe.getBoard().getCurrentPlayer()) && !ticTacToe.isAIStopped()) {
+                ticTacToe.setStopAI(true);
+            }
             this.dispose();
             ticTacToe.moveMadeUpdate();
         });

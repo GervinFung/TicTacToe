@@ -1,6 +1,7 @@
 ## Getting Started
 
 - I have decided to rewrite a TicTacToe game as the previous version is written badly
+- Started TicTacToe to understand how MiniMax algorithm actually works
 
 ## Folder Structure
 
@@ -20,8 +21,7 @@ No. | Steps
 3.| Watch 2 AI play against each other, or play against your friend, or play against AI
 4.| User must choose the grid layout before they can start the game, which range from 3x3 and 10x10
 5.| The game will restart when there's a winner, or it is a draw
-
-## The AI gets weaker as grid increase because I could not come up with an evaluation method to check if a board state is good enough
+6.| Different game layout can be chosen as well
 
 ![3x3 sample](3x3.png)
 ![4x4 sample](4x4.png)

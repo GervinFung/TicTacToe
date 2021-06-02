@@ -28,12 +28,8 @@ public final class TileButton extends JButton {
                 final String imagePath = (ticTacToe.getBoard().getCurrentPlayer().getLeague().isCross()) ? "shape_image/X.png" : "shape_image/O.png";
                 this.setIcon(getResizedImageIcon(this, imagePath));
 
-                for (final Move move : ticTacToe.getBoard().getCurrentPlayer().getLegalMoves()) {
-                    if (move.getIndex() == index) {
-                        ticTacToe.updateBoard(ticTacToe.getBoard().getCurrentPlayer().makeMove(move));
-                        break;
-                    }
-                }
+                final Move moveFound = ticTacToe.getBoard().getCurrentPlayer().getLegalMoves().stream().filter(move -> move.getIndex() == index).findFirst().orElseThrow();
+                ticTacToe.updateBoard(ticTacToe.getBoard().getCurrentPlayer().makeMove(moveFound));
 
                 SwingUtilities.invokeLater(() -> {
                     if (ticTacToe.getGameSetup().isAIPlayer(ticTacToe.getBoard().getCurrentPlayer())) {

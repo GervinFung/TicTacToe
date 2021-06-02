@@ -1,7 +1,6 @@
 package engine.move;
 
 import engine.board.Board;
-import engine.board.Tile;
 import engine.piece.League;
 import engine.piece.Piece;
 
@@ -19,9 +18,7 @@ public class Move {
 
     public final Board execute() {
         final BoardBuilder builder = new BoardBuilder(this.board.getCurrentPlayer().getOpponent().getLeague() ,this.board.getGrid());
-        for (final Tile tile : this.board.getTileList()) {
-            builder.addTile(tile);
-        }
+        this.board.getTileList().forEach(builder::addTile);
         builder.addPiece(this.piece);
         return builder.build();
     }
@@ -32,7 +29,7 @@ public class Move {
     public final int hashCode() { return this.piece.hashCode() * 31; }
 
     @Override
-    public final String toString() { return this.piece.toString(); }
+    public final String toString() { return this.piece.toString() + ":" + this.piece.getIndex(); }
 
     @Override
     public final boolean equals(final Object object) {

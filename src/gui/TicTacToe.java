@@ -6,6 +6,7 @@ import engine.player.ai.MiniMax;
 import gui.menu.GameMenu;
 import gui.menu.GameSetup;
 import gui.menu.GridSetup;
+import gui.menu.UILookAndFeel;
 import gui.panel.GamePanel;
 
 import javax.swing.JFrame;
@@ -97,6 +98,7 @@ public final class TicTacToe {
     private JMenuBar createMenuBar() {
         final JMenuBar menuBar = new JMenuBar();
         menuBar.add(new GameMenu(this));
+        menuBar.add(new UILookAndFeel(this));
         return menuBar;
     }
 
@@ -168,7 +170,9 @@ public final class TicTacToe {
         }
 
         @Override
-        public Move doInBackground() { return new MiniMax(this.ticTacToe.getGameSetup().getSearchDepth()).execute(this.ticTacToe.getBoard()); }
+        public Move doInBackground() {
+            return new MiniMax(this.ticTacToe.getGameSetup().getSearchDepth()).execute(this.ticTacToe.getBoard());
+        }
 
         @Override
         public void done() {
@@ -181,7 +185,9 @@ public final class TicTacToe {
                 }
                 this.ticTacToe.setAiThinking(false);
                 this.ticTacToe.setStopAI(true);
-                this.ticTacToe.moveMadeUpdate();
+                if (!this.ticTacToe.isGameOver()) {
+                    this.ticTacToe.moveMadeUpdate();
+                }
             } catch (final InterruptedException | ExecutionException ignored) {}
         }
     }

@@ -22,9 +22,7 @@ public final class GamePanel extends JPanel {
     }
 
     private void drawPanel() {
-        for (final TileButton tileBtn : this.tileButtons) {
-            this.add(tileBtn);
-        }
+        this.tileButtons.forEach(this::add);
     }
 
     public void setTileImage(final int index, final String path) {

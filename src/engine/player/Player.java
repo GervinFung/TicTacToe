@@ -1,7 +1,6 @@
 package engine.player;
 
 import engine.board.Board;
-import engine.board.Tile;
 import engine.move.Move;
 import engine.piece.League;
 
@@ -23,11 +22,11 @@ public abstract class Player {
     public final List<Move> getLegalMoves() { return this.legalMoves; }
     private List<Move> generateLegalMoves() {
         final List<Move> legalMoves = new ArrayList<>();
-        for (final Tile tile : this.board.getTileList()) {
+        this.board.getTileList().forEach(tile -> {
             if (tile.tileNotOccupied()) {
                 legalMoves.add(new Move(this.board, this.getLeague(), tile.getIndex()));
             }
-        }
+        });
         return Collections.unmodifiableList(legalMoves);
     }
 
